@@ -1,0 +1,38 @@
+{
+  "name": "restaurant-menu-app",
+  "version": "1.0.0",
+  "description": "Cosmic Restaurant Menu App",
+  "author": "BitBytes",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "precommit": "npm run lint"
+  },
+  "dependencies": {
+    "cosmicjs": "^2.4.20",
+    "css-loader": "^0.28.7",
+    "font-awesome": "^4.7.0",
+    "lodash": "^4.17.4",
+    "nuxt": "^1.0.0-rc11",
+    "style-loader": "^0.19.0",
+    "vee-validate": "^2.0.0-rc.18",
+    "vue-full-loading": "^1.0.3",
+    "vuejs-datepicker": "^0.9.16",
+    "vuetify": "^0.16.5"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.3.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-html": "^3.1.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.1.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1"
+  }
+}
