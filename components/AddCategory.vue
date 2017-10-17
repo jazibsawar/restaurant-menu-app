@@ -8,90 +8,119 @@
         <v-card-text>
           <v-container grid-list-md>
             <v-layout wrap>
-              <v-flex xs12 sm6 md4>
-                <v-text-field v-model="categoryModel.title" label="Title" :error-messages="errors.collect('title')" v-validate="'required'" data-vv-name="title" required></v-text-field>
-              </v-flex>
-              <v-flex xs12 sm6 md4>
-                <v-text-field v-model="categoryModel.content" :error-messages="errors.collect('description')" v-validate="'required'" data-vv-name="description" label="Description" hint="Short description for the category"></v-text-field>
-              </v-flex>
-              <v-flex xs12>
-                <div v-if="categoryModel.metadata.feature_image">
-                <img class="upload_image" :src="categoryModel.metadata.feature_image.url.replace(/ /g,'%20')" v-if="!!categoryModel.metadata.feature_image.url" />
+              <div>
+                <div v-if="!edittingCategoryTitle" class="headline">
+                    <span style="text-align:left" class="grey--text" >{{category.title}}</span>
+                    <v-btn @click="editCategory(category)" icon style="height: 25px; width: 30px;">
+                      <v-icon dark >fa-edit</v-icon>
+                    </v-btn>
                 </div>
-                <form enctype="multipart/form-data" novalidate>
-                <input type="file" @change="onFileChange" accept="image/*" data-vv-name="image" v-validate="'required|mimes:image/*'" required />
-                <div class="input-group fileUploadError">
-                    <div class="input-group__error" v-show="errors.has('image') && !edittingCategory" >
-                    {{ errors.first('image') }}
-                    </div>
-                </div>
-                </form>
-            </v-flex>
+                <v-flex v-else xs12 sm12 md12>
+                  <v-text-field v-model="category.title" label="Title" :error-messages="errors.collect('title')" v-validate="'required'" data-vv-name="title" required></v-text-field>
+                  <div style="color: red" v-show="categoryStatus.error" >
+                        {{ categoryStatus.error }}
+                  </div>
+                  <small>*indicates required field</small>
+                  <v-btn
+                    color="info"
+                    :loading="categoryStatus.loading"
+                    @click="saveCategory(category)"
+                    :disabled="categoryStatus.loading"
+                    >
+                    Save
+                    <span slot="loader" class="custom-loader">
+                        <v-icon light>fa-refresh</v-icon>
+                    </span>
+                  </v-btn>
+                </v-flex>
+              </div>
+              <v-container grid-list-md>
+                <label class="ingredients_list_label">Menu Items</label>
+                <v-flex v-if="category.menuItems" xs12 class="mb-2">
+                  <div class="input-group input-group--dirty">
+                    <ul class="ingredients_list">
+                      <li v-for="(item,index) in category.menuItems" :key="index">
+                        {{item.title}}
+                        <v-btn @click="removeMenuItem(index)" icon style="height: 30px; width: 30px">
+                          <v-icon dark >fa-trash-o</v-icon>
+                        </v-btn>
+                        <v-btn @click="editMenuItem(item, index)" icon style="height: 25px; width: 30px;">
+                          <v-icon dark >fa-edit</v-icon>
+                        </v-btn>
+                      </li>
+                    </ul>
+                  </div>
+                  <div v-if="menuItemModal">
+                    <AddMenuItem />
+                  </div>
+                  <v-btn warning fab small dark @click="addMenuItemModal">
+                    <v-icon>fa-plus</v-icon>
+                  </v-btn>
+                </v-flex>
+              </v-container>
             </v-layout>
           </v-container>
-          <div style="color: red" v-show="error" >
-                {{ error }}
-          </div>
-          <small>*indicates required field</small>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="closeDialog">Close</v-btn>
-          <v-btn
-            color="info"
-            :loading="loading"
-            @click="saveCategory(categoryModel)"
-            :disabled="loading"
-            >
-            Save
-            <span slot="loader" class="custom-loader">
-                <v-icon light>fa-refresh</v-icon>
-            </span>
-          </v-btn>
+          <v-btn color="blue darken-1" primary dark @click="closeDialog">Done</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
   </v-layout>
 </template>
 
-<<script>
+<script>
 import {mapGetters} from 'vuex'
+import AddMenuItem from '~/components/AddMenuItem.vue'
+import _ from 'lodash'
 
 export default {
+  components: {
+    AddMenuItem
+  },
   computed: {
     ...mapGetters([
-      'categoryModel',
+      'category',
+      'menuItemModal',
       'categoryModalOpen',
       'edittingCategory',
-      'loading',
-      'error'
+      'edittingCategoryTitle',
+      'categoryStatus'
     ])
   },
   methods: {
+    addMenuItemModal () {
+      this.$store.dispatch('toggleMenuItemModal')
+      this.$store.dispatch('setMenuItemDefault')
+      this.$store.dispatch('toggleEdittingMenuItem', false)
+      this.$store.dispatch('setMenuItemStatus')
+    },
+    editMenuItem (menuItem, index) {
+      let menu = _.cloneDeep(menuItem)
+      menu.index = index
+      this.$store.dispatch('setMenuItem', menu)
+      this.$store.dispatch('toggleEdittingMenuItem', true)
+      this.$store.dispatch('toggleMenuItemModal')
+    },
+    removeMenuItem (index) {
+      this.$store.dispatch('deleteMenuItem', index)
+    },
     closeDialog () {
       this.$validator.reset()
       this.$store.dispatch('toggleCategoryModal')
+      this.$store.dispatch('setSelectedCategory', 0)
+      this.$store.dispatch('toggleEdittingCategory', false)
       this.$store.dispatch('setCategoryDefault')
+      this.$store.dispatch('setCategoryStatus')
     },
-    onFileChange (e) {
-      var files = e.target.files || e.dataTransfer.files
-      if (!files.length) {
-        this.$store.dispatch('setCategoryImage', '')
-        this.$store.dispatch('setCategoryFile', '')
-        return
-      }
-      // var image = new Image()
-      var reader = new FileReader()
-      reader.onload = (e) => {
-        this.$store.dispatch('setCategoryImage', e.target.result)
-        this.$store.dispatch('setCategoryFile', files[0])
-      }
-      reader.readAsDataURL(files[0])
+    editCategory () {
+      this.$store.dispatch('toggleEditCategoryTitle', true)
     },
     saveCategory (category) {
       this.$validator.validateAll()
-      if (this.$store.state.edittingCategory) {
-        if ((!this.errors.any()) || (this.errors.count() === 1 && this.errors.has('image'))) {
+      if (this.$store.getters.edittingCategoryTitle) {
+        if ((!this.errors.any())) {
           this.$store.dispatch('editCategory', category)
         }
       } else {
@@ -103,41 +132,3 @@ export default {
   }
 }
 </script>
-<style>
-  .custom-loader {
-    animation: loader 1s infinite;
-    display: flex;
-  }
-  @-moz-keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @-webkit-keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @-o-keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-</style>

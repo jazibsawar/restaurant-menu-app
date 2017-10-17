@@ -16,19 +16,21 @@
             v-for="(category, index) in categories" :key="index"
           >
             <v-card>
-              <v-card-media
-                v-if="category.metadata"
-                :src="category.metadata.feature_image.url"
-                height="200px"
-              >
-                <v-container fill-height fluid>
-                  <v-layout fill-height>
-                    <v-flex xs12 align-end flexbox>
-                      <span class="headline white--text" v-text="category.title"></span>
-                    </v-flex>
-                  </v-layout>
-                </v-container>
-              </v-card-media>
+              <nuxt-link :to="'/menu/'+category._id">
+                <v-card-media
+                    v-if="category.metadata"
+                    :src="category.metadata.feature_image.url"
+                    height="200px"
+                >
+                    <v-container fill-height fluid>
+                    <v-layout fill-height>
+                        <v-flex xs12 align-end flexbox>
+                        <span class="headline white--text" v-text="category.title"></span>
+                        </v-flex>
+                    </v-layout>
+                    </v-container>
+                </v-card-media>
+              </nuxt-link>
               <v-card-actions class="white">
                 <v-spacer v-text="category.content"></v-spacer>
                 <v-btn @click="openEditForm(category)" icon>

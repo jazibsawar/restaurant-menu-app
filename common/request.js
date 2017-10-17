@@ -1,35 +1,13 @@
 import Cosmic from './Cosmic'
 import config from '../config/config'
-import _ from 'lodash'
-import {generateMenuObject, generateCategoryObject} from './paramMapping'
-
-function addCategory (obj) {
-  return new Promise((resolve, reject) => {
-    console.log('Request: ', obj)
-    addMedia(obj.metadata.feature_image.file).then((media) => {
-      obj.metadata.feature_image.url = media.url
-      obj.metadata.feature_image.imgix_url = media.imgix_url
-      obj.metadata.feature_image.value = media.name
-      obj.metadata.feature_image.id = media._id
-      const params = generateCategoryObject(obj)
-      Cosmic.addObject(config, params, (err, res) => {
-        if (!err) {
-          resolve(res.object)
-        } else {
-          reject(err)
-        }
-      })
-    })
-      .catch((e) => {
-        reject(e)
-      })
-  })
-}
+import async from 'async'
+// import _ from 'lodash'
+import {generateMenuObject} from './paramMapping'
 
 function getMenus (pagination) {
   return new Promise((resolve, reject) => {
     const params = {
-      type_slug: config.menu_object,
+      type_slug: config.object_type,
       limit: pagination.limit,
       sort: '-created_at',
       skip: (pagination.page - 1) * pagination.limit
@@ -64,134 +42,39 @@ function getCategories (pagination) {
 
 function addMenu (obj) {
   return new Promise((resolve, reject) => {
-    console.log('Request: ', obj)
-    addMedia(obj.metadata.feature_image.file).then((media) => {
-      obj.metadata.feature_image.url = media.url
-      obj.metadata.feature_image.imgix_url = media.imgix_url
-      obj.metadata.feature_image.value = media.name
-      obj.metadata.feature_image.id = media._id
-      const params = generateMenuObject(obj)
-      Cosmic.addObject(config, params, (err, res) => {
-        if (!err) {
-          resolve(res.object)
-        } else {
-          reject(err)
-        }
-      })
+    const params = generateMenuObject(obj)
+    Cosmic.addObject(config, params, (err, res) => {
+      if (!err) {
+        resolve(res.object)
+      } else {
+        reject(err)
+      }
     })
-      .catch((e) => {
-        reject(e)
-      })
   })
 }
 
-function editCategory (obj) {
-  const featureImage = _.find(obj.metafields, ['key', 'feature_image'])
-  return new Promise((resolve, reject) => {
-    if (obj.metadata.feature_image.file) {
-      deleteMedia(featureImage.id).then((res) => {
-        addMedia(obj.metadata.feature_image.file).then((media) => {
-          obj.metadata.feature_image.url = media.url
-          obj.metadata.feature_image.imgix_url = media.imgix_url
-          obj.metadata.feature_image.value = media.name
-          obj.metadata.feature_image.id = media._id
-          const params = generateCategoryObject(obj, true)
-          Cosmic.editObject(config, params, (err, res) => {
-            if (!err) {
-              resolve(res.object)
-            } else {
-              reject(err)
-            }
-          })
-        })
-          .catch((e) => {
-            reject(e)
-          })
-      })
-        .catch((e) => {
-          reject(e)
-        })
-    } else {
-      obj.metadata.feature_image.value = featureImage.value
-      obj.metadata.feature_image.id = featureImage.id
-      const params = generateCategoryObject(obj, true)
-      Cosmic.editObject(config, params, (err, res) => {
-        if (!err) {
-          resolve(res.object)
-        } else {
-          reject(err)
-        }
+function deleteCategory (category) {
+  async.eachSeries(category.menuItems, (menu, callback) => {
+    if (!!menu.feature_image && !!menu.feature_image.id) {
+      deleteMedia(menu.feature_image.id).then((res) => {
+        callback()
       })
     }
   })
 }
 
-function deleteCategory (category) {
-  const params = {
-    write_key: config.bucket.write_key,
-    slug: category.slug
-  }
-  const featureImage = _.find(category.metafields, ['key', 'feature_image'])
+function editMenu (obj) {
   return new Promise((resolve, reject) => {
-    deleteMedia(featureImage.id).then((res) => {
-      Cosmic.deleteObject(config, params, (err, res) => {
-        if (!err) {
-          resolve(res)
-        } else {
-          reject(err)
-        }
-      })
+    const params = generateMenuObject(obj, true)
+    Cosmic.editObject(config, params, (err, res) => {
+      if (!err) {
+        resolve(res.object)
+      } else {
+        reject(err)
+      }
     })
-      .catch((e) => {
-        reject(e)
-      })
   })
 }
-
-// function editMenu (obj) {
-//   const feature_image = _.find(obj.metafields, ['key', 'feature_image'])
-//   return new Promise((resolve, reject) => {
-//     if (obj.metadata.feature_image.file) {
-//       deleteMedia(feature_image.id).then((res) => {
-//         if (res.status === 200) {
-//           addMedia(obj.metadata.feature_image.file).then((media) => {
-//             obj.metadata.feature_image.url = media.url
-//             obj.metadata.feature_image.imgix_url = media.imgix_url
-//             obj.metadata.feature_image.value = media.name
-//             obj.metadata.feature_image.id = media._id
-//             const params = generateRecipeObject(obj, true)
-//             Cosmic.editObject(config, params, (err, res) => {
-//               if (!err) {
-//                 resolve(res.object)
-//               } else {
-//                 reject(err)
-//               }
-//             })
-//           })
-//             .catch((e) => {
-//               reject(e)
-//             })
-//         } else {
-//           reject(err)
-//         }
-//       })
-//         .catch((e) => {
-//           reject(e)
-//         })
-//     } else {
-//       obj.metadata.feature_image.value = feature_image.value
-//       obj.metadata.feature_image.id = feature_image.id
-//       const params = generateRecipeObject(obj, true)
-//       Cosmic.editObject(config, params, (err, res) => {
-//         if (!err) {
-//           resolve(res.object)
-//         } else {
-//           reject(err)
-//         }
-//       })
-//     }
-//   })
-// }
 
 // function deleteMenu (recipe) {
 //   const params = {
@@ -218,6 +101,38 @@ function deleteCategory (category) {
 //       })
 //   })
 // }
+function saveMedia (payload) {
+  return new Promise((resolve, reject) => {
+    if (payload.feature_image.file && payload.feature_image.id) {
+      deleteMedia(payload.feature_image.id).then((res) => {
+        addMedia(payload.feature_image.file).then((media) => {
+          payload.feature_image.url = media.url
+          payload.feature_image.imgix_url = media.imgix_url
+          payload.feature_image.value = media.name
+          payload.feature_image.id = media._id
+          delete payload.feature_image.file
+          resolve(payload)
+        })
+      })
+        .catch(e => {
+          reject(e)
+        })
+    } else {
+      addMedia(payload.feature_image.file).then((media) => {
+        payload.feature_image.url = media.url
+        payload.feature_image.imgix_url = media.imgix_url
+        payload.feature_image.value = media.name
+        payload.feature_image.id = media._id
+        delete payload.feature_image.file
+        resolve(payload)
+      })
+        .catch(e => {
+          reject(e)
+        })
+    }
+  })
+}
+
 function addMedia (file) {
   const params = {
     media: file,
@@ -249,4 +164,4 @@ function deleteMedia (id) {
     })
   })
 }
-export default {getMenus, addMenu, addCategory, getCategories, editCategory, deleteCategory}
+export default {getMenus, addMenu, editMenu, getCategories, deleteCategory, saveMedia, deleteMedia}

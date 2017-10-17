@@ -4,7 +4,7 @@
   <main>
     <v-content>
       <v-container fluid>
-        <category />
+        <restaurantMenu />
       </v-container>
     </v-content>
   </main>
@@ -13,12 +13,12 @@
 </template>
 
 <script>
-import category from '~/components/Category.vue'
+import restaurantMenu from '~/components/Menu.vue'
 import Datepicker from 'vuejs-datepicker'
 
 export default {
   components: {
-    category,
+    restaurantMenu,
     Datepicker
   }
 }
