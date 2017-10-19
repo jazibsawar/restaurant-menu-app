@@ -3,7 +3,7 @@ module.exports = {
   ** Headers of the page
   */
   head: {
-    title: 'restaurant-menu-app',
+    title: 'Restaurant Menu App',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -11,9 +11,12 @@ module.exports = {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      { rel: 'stylesheet', type: 'text/css', href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' }
+      { rel: 'stylesheet', type: 'text/css', href: 'https://fonts.googleapis.com/icon?family=Material+Icons' },
+      { rel: 'stylesheet', type: 'text/css', href: 'https://fonts.googleapis.com/css?family=Dancing+Script:700' },
+      { rel: 'stylesheet', type: 'text/css', href: 'https://fonts.googleapis.com/css?family=Crimson+Text:400,600,700,400italic' }
     ]
   },
+  plugins: ['~plugins/buefy'],
   /*
   ** Customize the progress bar color
   */
@@ -36,7 +39,7 @@ module.exports = {
         config.module.rules.push({
           enforce: 'pre',
           test: /\.styl$/,
-          loader: ['style-loader', 'css-loader', 'stylus-loader'],
+          loader: ['style-loader', 'css-loader'],
           exclude: /(node_modules)/
         })
       }

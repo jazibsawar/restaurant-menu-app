@@ -8,8 +8,7 @@ Vue.use(Vuex)
 Vue.use(VeeValidate)
 
 const state = {
-  menus: [
-  ],
+  menus: null,
   menu: {
     title: null,
     content: null,
@@ -45,6 +44,7 @@ const state = {
     content: null,
     menuItems: []
   },
+  selectedDate: new Date(),
   addMenu: false,
   addMenuDetails: false,
   categoryModalOpen: false,
@@ -55,6 +55,7 @@ const state = {
   edittingCategoryTitle: false,
   editting: false,
   selectedCategory: null,
+  initializeStatus: false,
   pagination: {
     page: 1,
     limit: 12,
@@ -128,6 +129,9 @@ const getters = {
   },
   selectedCategory (state) {
     return state.selectedCategory
+  },
+  initializeStatus (state) {
+    return state.initializeStatus
   }
 }
 
@@ -160,6 +164,9 @@ const mutations = {
   },
   SET_MENUS (state, payload) {
     state.menus = payload
+  },
+  SET_MENU (state, payload) {
+    state.menu = payload
   },
   TOGGLE_ADD_MENU (state) {
     state.addMenu = !state.addMenu
@@ -301,19 +308,33 @@ const mutations = {
   },
   SET_SELECTED_CATEGORY (state, payload) {
     state.selectedCategory = payload
+  },
+  SET_SELECTED_DATE (state, payload) {
+    state.selectedDate = payload
+  },
+  SET_INITIALIZE_STATUS (state, payload) {
+    state.initializeStatus = payload
   }
 }
 
 const actions = {
   getMenus (context) {
     context.commit('LOADING')
-    Request.getMenus(context.getters.pagination).then(res => {
-      context.commit('SET_MENUS', res.objects.all || [])
+    console.log('Date1: ', this.state.selectedDate)
+    Request.getMenus(this.state.selectedDate.toISOString()).then(res => {
+      console.log('res: ', res)
+      if (res.total) {
+        console.log('here')
+        res.objects.all[0].metadata.menu = JSON.parse(res.objects.all[0].metadata.menu)
+        context.commit('SET_MENUS', res.objects.all[0])
+      } else {
+        context.commit('SET_MENUS', null)
+      }
       context.commit('SET_TOTAL', res.total || 0)
       context.commit('SUCCESS')
     })
       .catch(e => {
-        context.commit('ERROR', e)
+        context.commit('ERROR', 'Something went wrong.')
       })
   },
   addMenu (context, payload) {
@@ -327,7 +348,7 @@ const actions = {
         context.commit('SUCCESS')
       })
         .catch(e => {
-          context.commit('ERROR', e)
+          context.commit('ERROR', 'Something went wrong.')
         })
     } else {
       context.commit('ERROR', 'Menu for this date already present!')
@@ -341,7 +362,7 @@ const actions = {
       context.commit('SUCCESS')
     })
       .catch(e => {
-        context.commit('ERROR', e)
+        context.commit('ERROR', 'Something went wrong.')
       })
   },
   addMenuItem (context, payload) {
@@ -357,11 +378,11 @@ const actions = {
           context.commit('MENU_ITEM_SUCCESS')
         })
           .catch(e => {
-            context.commit('MENU_ITEM_ERROR', e)
+            context.commit('MENU_ITEM_ERROR', 'Something went wrong.')
           })
       })
         .catch(e => {
-          context.commit('MENU_ITEM_ERROR', e)
+          context.commit('MENU_ITEM_ERROR', 'Something went wrong.')
         })
     } else {
       context.commit('MENU_ITEM_ERROR', 'Menu Item Already Present!')
@@ -380,11 +401,11 @@ const actions = {
           context.commit('MENU_ITEM_SUCCESS')
         })
           .catch(e => {
-            context.commit('MENU_ITEM_ERROR', e)
+            context.commit('MENU_ITEM_ERROR', 'Something went wrong.')
           })
       })
         .catch(e => {
-          context.commit('MENU_ITEM_ERROR', e)
+          context.commit('MENU_ITEM_ERROR', 'Something went wrong.')
         })
     } else {
       context.commit('MENU_ITEM_ERROR', 'Menu Item Already Present!')
@@ -401,11 +422,11 @@ const actions = {
         context.commit('MENU_ITEM_SUCCESS')
       })
         .catch(e => {
-          context.commit('MENU_ITEM_ERROR', e)
+          context.commit('MENU_ITEM_ERROR', 'Something went wrong.')
         })
     })
       .catch(e => {
-        context.commit('MENU_ITEM_ERROR', e)
+        context.commit('MENU_ITEM_ERROR', 'Something went wrong.')
       })
   },
   getCategories (context) {
@@ -416,7 +437,7 @@ const actions = {
       context.commit('SUCCESS')
     })
       .catch(e => {
-        context.commit('ERROR', e)
+        context.commit('ERROR', 'Something went wrong.')
       })
   },
   addCategory (context, payload) {
@@ -430,7 +451,7 @@ const actions = {
         context.commit('TOGGLE_CATEGORY_MODAL')
       })
         .catch(e => {
-          context.commit('CATEGORY_ERROR', e)
+          context.commit('CATEGORY_ERROR', 'Something went wrong.')
         })
     } else {
       context.commit('CATEGORY_ERROR', 'Category Already Present!')
@@ -447,7 +468,7 @@ const actions = {
         context.commit('TOGGLE_EDITTING_CATEGORY_TITLE', false)
       })
         .catch(e => {
-          context.commit('CATEGORY_ERROR', e)
+          context.commit('CATEGORY_ERROR', 'Something went wrong.')
         })
     } else {
       context.commit('CATEGORY_ERROR', 'Category Already Present!')
@@ -504,7 +525,7 @@ const actions = {
       context.commit('CATEGORY_SUCCESS')
     })
       .catch(e => {
-        context.commit('CATEGORY_ERROR', e)
+        context.commit('CATEGORY_ERROR', 'Something went wrong.')
       })
   },
   setMenuDefault (context) {
@@ -521,6 +542,15 @@ const actions = {
   },
   setCategoryStatus (context) {
     context.commit('CATEGORY_SUCCESS')
+  },
+  setSelectedDate (context, payload) {
+    context.commit('SET_SELECTED_DATE', payload)
+  },
+  setInitializeStatus (context, payload) {
+    context.commit('SET_INITIALIZE_STATUS', payload)
+  },
+  setMenu (context, payload) {
+    context.commit('SET_MENU', payload)
   }
 }
 

@@ -14,17 +14,14 @@
   },
   "dependencies": {
     "async": "^2.5.0",
+    "buefy": "^0.5.4",
     "cosmicjs": "^2.4.20",
     "css-loader": "^0.28.7",
     "font-awesome": "^4.7.0",
     "lodash": "^4.17.4",
     "nuxt": "^1.0.0-rc11",
     "style-loader": "^0.19.0",
-    "vee-validate": "^2.0.0-rc.18",
-    "vue-full-loading": "^1.0.3",
-    "vue-material": "^0.7.5",
-    "vuejs-datepicker": "^0.9.16",
-    "vuetify": "^0.16.5"
+    "vee-validate": "^2.0.0-rc.18"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",

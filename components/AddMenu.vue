@@ -1,86 +1,71 @@
 <template>
-  <v-layout row justify-center>
-    <v-dialog v-model="addMenu" persistent max-width="500px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">{{ editting ? 'Edit ' : 'Add ' }} Menu</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container grid-list-md>
-            <v-layout wrap>
-              <v-flex xs12 sm6 md4>
-                <v-text-field v-model="menu.title" label="Title" :error-messages="errors.collect('title')" v-validate="'required'" data-vv-name="title" required></v-text-field>
-              </v-flex>
-             <v-flex xs11 sm5>
-                <v-menu
-                    lazy
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    full-width
-                    :nudge-right="40"
-                    max-width="290px"
-                    min-width="290px"
-                >
-                    <v-text-field
-                    slot="activator"
-                    label="Select Date"
-                    v-model="menu.metadata.date"
-                    prepend-icon="event"
-                    readonly
-                    ></v-text-field>
-                    <v-date-picker v-model="menu.metadata.date" no-title scrollable actions>
-                    <template scope="{ save, cancel }">
-                        <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn flat color="primary" @click="cancel">Cancel</v-btn>
-                        <v-btn flat color="primary" @click="save">OK</v-btn>
-                        </v-card-actions>
-                    </template>
-                    </v-date-picker>
-                </v-menu>
-                </v-flex>
-            </v-layout>
-          </v-container>
+ <b-modal :active.sync="addMenu" max-width="500px">
+    <div class="modal-card">
+      <header class="modal-card-head">
+          <p class="modal-card-title">{{ editting ? 'Edit ' : 'Add ' }} Menu</p>
+      </header>
+      <section class="modal-card-body menu-modal-body">
+          <b-field label="Select a date" :message="errors.collect('date')" >
+            <b-datepicker v-model="menu.metadata.date"
+                :first-day-of-week="1"
+                placeholder="Click to select"
+                v-validate="'required'" data-vv-name="date"
+                required>
+            </b-datepicker>
+          </b-field>
+          <b-field label="Title" :message="errors.collect('title')">
+              <b-input
+                  type="text"
+                  v-model="menu.title"
+                  placeholder="Menu Title"
+                  v-validate="'required'" data-vv-name="title"
+                  required>
+              </b-input>
+          </b-field>
+
+          <b-field label="Description" :message="errors.collect('description')">
+              <b-input
+                  type="textarea"
+                  maxlength="200"
+                  v-model="menu.content"
+                  placeholder="Menu Description"
+                  v-validate="'required'" data-vv-name="description"
+                  required>
+              </b-input>
+          </b-field>
+      </section>
+      <footer class="modal-card-foot">
           <div style="color: red" v-show="status.error" >
                 {{ status.error }}
           </div>
-          <small>*indicates required field</small>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="closeDialog">Close</v-btn>
-          <v-btn
-            color="info"
-            :loading="status.loading"
-            @click="saveMenu(menu)"
-            :disabled="status.loading"
-            >
-            Save
-            <span slot="loader" class="custom-loader">
-                <v-icon light>fa-refresh</v-icon>
-            </span>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-layout>
+          <button class="button is-medium" type="button" @click="closeDialog">Close</button>
+          <button v-if="!status.loading" class="button is-info is-medium" @click="saveMenu(menu)" >Save</button>
+          <button v-else class="button is-info is-loading is-medium" @click="saveMenu(menu)" disabled>Save</button>
+      </footer>
+  </div>
+ </b-modal>
 </template>
 
-<<script>
+<script>
 import {mapGetters} from 'vuex'
-import Datepicker from 'vuejs-datepicker'
 import Loader from '~/components/Loader.vue'
 
 export default {
   components: {
-    Datepicker,
     Loader
   },
   computed: {
     ...mapGetters([
-      'menu', 'status', 'addMenu', 'editting'
-    ])
+      'menu', 'status', 'editting'
+    ]),
+    addMenu: {
+      get: function () {
+        return this.$store.state.addMenu
+      },
+      set: function (value) {
+        this.$store.dispatch('toggleAddMenu')
+      }
+    }
   },
   methods: {
     closeDialog () {
@@ -89,6 +74,7 @@ export default {
       this.$store.dispatch('toggleAddMenu')
     },
     saveMenu (menu) {
+      console.log('here')
       this.$validator.validateAll()
       if (this.$store.editting) {
         if ((!this.errors.any())) {
@@ -96,6 +82,7 @@ export default {
         }
       } else {
         if (!this.errors.any()) {
+          console.log('validated')
           this.$store.dispatch('addMenu', menu)
         }
       }
@@ -103,3 +90,9 @@ export default {
   }
 }
 </script>
+
+<style lang="css" scoped>
+  .menu-modal-body {
+     padding-bottom: 150px;
+  }
+</style>

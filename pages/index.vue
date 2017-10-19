@@ -1,25 +1,17 @@
 <template>
-  <v-app>
-  <v-toolbar app>restaurant-menu-app</v-toolbar>
-  <main>
-    <v-content>
-      <v-container fluid>
-        <restaurantMenu />
-      </v-container>
-    </v-content>
-  </main>
-  <v-footer app></v-footer>
-</v-app>
+  <section class="section">
+    <div class="container-fluid">
+      <LandingPage />
+    </div>
+  </section>
 </template>
 
 <script>
-import restaurantMenu from '~/components/Menu.vue'
-import Datepicker from 'vuejs-datepicker'
+import LandingPage from '~/components/LandingPage.vue'
 
 export default {
   components: {
-    restaurantMenu,
-    Datepicker
+    LandingPage
   }
 }
 </script>

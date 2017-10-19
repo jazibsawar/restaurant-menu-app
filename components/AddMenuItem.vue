@@ -1,44 +1,55 @@
 <template>
-  <div>
-    <v-flex xs12 >
-        <span class="headline">{{ edittingMenuItem ? 'Edit ' : 'Add ' }} Menu Item</span>
-    </v-flex>
-    <v-flex xs12 >
-        <v-text-field v-model="menuItem.title" label="Title" :error-messages="errors.collect('title')" v-validate="'required'" data-vv-name="title" required></v-text-field>
-    </v-flex>
-    <v-flex xs12 >
-        <v-text-field v-model="menuItem.content" label="Description" :error-messages="errors.collect('description')" v-validate="'required'" data-vv-name="description" required></v-text-field>
-    </v-flex>
-    <v-flex xs12 >
-        <v-text-field v-model="menuItem.price" label="Price" :error-messages="errors.collect('price')" v-validate="'required'" data-vv-name="price" required></v-text-field>
-    </v-flex>
-    <v-flex xs12>
-        <img style="height: 25%; width: 25%;" class="upload_image" :src="menuItem.feature_image.url.replace(/ /g,'%20')" v-if="!!menuItem.feature_image.url" />
-        <form enctype="multipart/form-data" novalidate>
-        <input type="file" @change="onFileChange" accept="image/*" data-vv-name="image" v-validate="'required|mimes:image/*'" required />
-        <div class="input-group fileUploadError">
-            <div class="input-group__error" v-show="errors.has('image') && !edittingMenuItem">
-            {{ errors.first('image') }}
-            </div>
-        </div>
-        </form>
-    </v-flex>
-    <div style="color: red" v-show="menuItemStatus.error" >
-                {{ menuItemStatus.error }}
+ <div class="field">
+    <label class="label is-medium">{{ edittingMenuItem ? 'Edit ' : 'Add ' }} Menu Item</label>
+    <b-field :message="errors.collect('title')">
+        <b-input
+            type="text"
+            v-model="menuItem.title"
+            placeholder="Add Item Title"
+            v-validate="'required'" data-vv-name="title"
+            required>
+        </b-input>
+    </b-field>
+    <b-field :message="errors.collect('description')">
+        <b-input
+            type="text"
+            maxlength="200"
+            v-model="menuItem.content"
+            placeholder="Menu Item Description"
+            v-validate="'required'" data-vv-name="description"
+            required>
+        </b-input>
+    </b-field>
+    <b-field :message="errors.collect('price')">
+        <b-input
+            type="number"
+            maxlength="200"
+            v-model="menuItem.price"
+            placeholder="Menu Item Price"
+            v-validate="'required'" data-vv-name="price"
+            required>
+        </b-input>
+    </b-field>
+    <b-field >
+      <img style="height: 25%; width: 25%;" class="upload_image" :src="menuItem.feature_image.url.replace(/ /g,'%20')" v-if="!!menuItem.feature_image.url" />
+      <form enctype="multipart/form-data" novalidate>
+      <input type="file" @change="onFileChange" accept="image/*" data-vv-name="image" v-validate="'required|mimes:image/*'" required />
+      <div class="input-group fileUploadError">
+          <div class="input-group__error" v-show="errors.has('image') && !edittingMenuItem">
+          {{ errors.first('image') }}
           </div>
-    <v-flex>
-        <v-btn
-            color="info"
-            :loading="menuItemStatus.loading"
-            @click="addMenuItem(menuItem)"
-            :disabled="menuItemStatus.loading"
-            >
-            Save
-            <span slot="loader" class="custom-loader">
-                <v-icon light>fa-refresh</v-icon>
-            </span>
-          </v-btn>
-    </v-flex>
+      </div>
+      </form>
+    </b-field>
+    <div v-show="menuItemStatus.error" class="field is-danger" >
+      {{ menuItemStatus.error }}
+    </div>
+    <div class="field">
+      <p class="control">
+        <button v-if="!menuItemStatus.loading" class="button is-info is-medium" @click="addMenuItem(menuItem)" >Save</button>
+        <button v-else class="button is-info is-loading is-medium" @click="addMenuItem(menuItem)" disabled>Save</button>
+      </p>
+    </div>
   </div>
 </template>
 <script>

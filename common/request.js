@@ -4,15 +4,14 @@ import async from 'async'
 // import _ from 'lodash'
 import {generateMenuObject} from './paramMapping'
 
-function getMenus (pagination) {
+function getMenus (date) {
   return new Promise((resolve, reject) => {
     const params = {
       type_slug: config.object_type,
-      limit: pagination.limit,
-      sort: '-created_at',
-      skip: (pagination.page - 1) * pagination.limit
+      metafield_key: 'date',
+      metafield_value: date
     }
-    Cosmic.getObjectsByType(config, params, (err, res) => {
+    Cosmic.getObjectsBySearch(config, params, (err, res) => {
       if (!err) {
         resolve(res)
       } else {

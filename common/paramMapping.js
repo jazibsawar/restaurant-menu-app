@@ -5,7 +5,7 @@ function generateMenuObject (payload, edit = false) {
     write_key: config.bucket.write_key,
     type_slug: config.object_type,
     title: payload.title,
-    content: payload.title,
+    content: payload.content,
     metafields: [{
       required: true,
       value: JSON.stringify(payload.metadata.menu),

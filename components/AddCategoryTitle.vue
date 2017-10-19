@@ -1,41 +1,30 @@
 <template>
-<v-layout row justify-center>
-    <v-dialog v-model="addCategoryTitle" persistent max-width="500px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">{{ edittingCategoryTitle ? 'Edit ' : 'Add ' }} Category</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container grid-list-md>
-            <v-layout wrap>
-              <v-flex xs12 sm6 md4>
-                <v-text-field v-model="category.title" label="Title" :error-messages="errors.collect('title')" v-validate="'required'" data-vv-name="title" required></v-text-field>
-              </v-flex>
-            </v-layout>
-          </v-container>
-          <div style="color: red" v-show="categoryStatus.error" >
-                {{ categoryStatus.error }}
-          </div>
-          <small>*indicates required field</small>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="closeDialog">Close</v-btn>
-          <v-btn
-            color="info"
-            :loading="categoryStatus.loading"
-            @click="saveCategory(category)"
-            :disabled="categoryStatus.loading"
-            >
-            Save
-            <span slot="loader" class="custom-loader">
-                <v-icon light>fa-refresh</v-icon>
-            </span>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-layout>
+  <b-modal :active.sync="addCategoryTitle" max-width="500px">
+      <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">{{ edittingCategoryTitle ? 'Edit ' : 'Add ' }} Category Title</p>
+        </header>
+        <section class="modal-card-body menu-modal-body">
+            <b-field label="Title" :message="errors.collect('title')">
+                <b-input
+                    type="text"
+                    v-model="category.title"
+                    placeholder="Category Title"
+                    v-validate="'required'" data-vv-name="title"
+                    required>
+                </b-input>
+            </b-field>
+        </section>
+        <footer class="modal-card-foot">
+            <div style="color: red" v-show="categoryStatus.error" >
+                   {{ categoryStatus.error }}
+            </div>
+            <button class="button is-medium" type="button" @click="closeDialog">Close</button>
+            <button v-if="!categoryStatus.loading" class="button is-info is-medium" @click="saveCategory(category)" >Save</button>
+            <button v-else class="button is-info is-loading is-medium" @click="saveCategory(category)" disabled>Save</button>
+        </footer>
+    </div>
+  </b-modal>
 </template>
 <script>
 import {mapGetters} from 'vuex'

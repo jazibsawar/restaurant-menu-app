@@ -1,73 +1,87 @@
 <template>
-  <v-layout row justify-center>
-    <v-dialog v-model="categoryModalOpen" persistent max-width="500px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">{{ edittingCategory ? 'Edit ' : 'Add ' }} Category</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container grid-list-md>
-            <v-layout wrap>
-              <div>
-                <div v-if="!edittingCategoryTitle" class="headline">
-                    <span style="text-align:left" class="grey--text" >{{category.title}}</span>
-                    <v-btn @click="editCategory(category)" icon style="height: 25px; width: 30px;">
-                      <v-icon dark >fa-edit</v-icon>
-                    </v-btn>
-                </div>
-                <v-flex v-else xs12 sm12 md12>
-                  <v-text-field v-model="category.title" label="Title" :error-messages="errors.collect('title')" v-validate="'required'" data-vv-name="title" required></v-text-field>
-                  <div style="color: red" v-show="categoryStatus.error" >
-                        {{ categoryStatus.error }}
-                  </div>
-                  <small>*indicates required field</small>
-                  <v-btn
-                    color="info"
-                    :loading="categoryStatus.loading"
-                    @click="saveCategory(category)"
-                    :disabled="categoryStatus.loading"
-                    >
-                    Save
-                    <span slot="loader" class="custom-loader">
-                        <v-icon light>fa-refresh</v-icon>
-                    </span>
-                  </v-btn>
-                </v-flex>
+  <b-modal :active.sync="categoryModalOpen" max-width="500px">
+      <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">{{ edittingCategory ? 'Edit ' : 'Add ' }} Category</p>
+        </header>
+        <section class="modal-card-body menu-modal-body">
+            <div class="field">
+              <b-field :message="errors.collect('title')">
+                  <b-input
+                      type="text"
+                      v-model="category.title"
+                      placeholder="Category Title"
+                      v-validate="'required'" data-vv-name="title"
+                      :disabled="!edittingCategoryTitle"
+                      required>
+                  </b-input>
+              </b-field>
+              <div v-show="categoryStatus.error" class="field is-danger" >
+                {{ categoryStatus.error }}
               </div>
-              <v-container grid-list-md>
-                <label class="ingredients_list_label">Menu Items</label>
-                <v-flex v-if="category.menuItems" xs12 class="mb-2">
-                  <div class="input-group input-group--dirty">
-                    <ul class="ingredients_list">
-                      <li v-for="(item,index) in category.menuItems" :key="index">
-                        {{item.title}}
-                        <v-btn @click="removeMenuItem(index)" icon style="height: 30px; width: 30px">
-                          <v-icon dark >fa-trash-o</v-icon>
-                        </v-btn>
-                        <v-btn @click="editMenuItem(item, index)" icon style="height: 25px; width: 30px;">
-                          <v-icon dark >fa-edit</v-icon>
-                        </v-btn>
-                      </li>
-                    </ul>
+              <div class="field">
+                <p class="control">
+                  <div v-if="!edittingCategoryTitle">
+                    <button class="button is-info" @click="editCategory(category)">
+                      Edit
+                    </button>
                   </div>
-                  <div v-if="menuItemModal">
+                  <div v-else>
+                    <button v-if="!categoryStatus.loading" class="button is-info is-medium" @click="saveCategory(category)" >Save</button>
+                    <button v-else class="button is-info is-loading is-medium" @click="saveCategory(category)" disabled>Save</button>
+                  </div>
+                </p>
+              </div>
+            </div>
+
+            <div >
+              <label class="label is-medium">Menu Items</label>
+                <div class="box" v-if="category.menuItems" v-for="(item,index) in category.menuItems" :key="index">
+                  <article class="media">
+                    <div class="media-left menu-item-image">
+                      <figure class="image menu-item-image">
+                        <img :src="item.feature_image.url" :alt="item.title" :title="item.title">
+                      </figure>
+                    </div>
+                    <div class="media-content">
+                      <div class="content">
+                        <div class="columns menu-item-info">
+                          <div class="column is-8">
+                            <p>
+                              <strong>{{item.title}}</strong>
+                              <br>
+                              {{item.content}}
+                            </p>
+                          </div>
+                          <div class="column menu-item-price">
+                            <p>${{item.price}}</p>
+                          </div>
+                          <div class="column menu-item-price">
+                            <button class="button is-warning" @click="editMenuItem(item, index)">
+                                Edit
+                            </button>
+                            <button class="button is-danger" @click="removeMenuItem(index)">
+                                Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+                <div v-if="menuItemModal">
                     <AddMenuItem />
-                  </div>
-                  <v-btn warning fab small dark @click="addMenuItemModal">
-                    <v-icon>fa-plus</v-icon>
-                  </v-btn>
-                </v-flex>
-              </v-container>
-            </v-layout>
-          </v-container>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" primary dark @click="closeDialog">Done</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-layout>
+                </div>
+                <button v-if="!menuItemModal" class="button is-warning" @click="addMenuItemModal">
+                      Add
+                </button>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-medium" type="button" @click="closeDialog">Close</button>
+        </footer>
+    </div>
+  </b-modal>
 </template>
 
 <script>
@@ -132,3 +146,24 @@ export default {
   }
 }
 </script>
+<style lang="css" scoped>
+    .menu-item-image {
+      width: 80px;
+      height: 92px;
+    }
+    .menu-item-image img {
+      height: 100%;
+      width: auto;
+    }
+    .menu-item-info {
+      min-height: 92px;
+      justify-content: center;
+      align-items: center;
+    }
+    .menu-item-info .menu-item-price {
+      text-align: right;
+      font-weight: bold;
+      font-family: 'Dancing Script';
+      color: #1a1a1a;
+    }
+</style>
