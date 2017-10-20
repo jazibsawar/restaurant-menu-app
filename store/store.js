@@ -44,12 +44,13 @@ const state = {
     content: null,
     menuItems: []
   },
-  selectedDate: new Date(),
+  selectedDate: new Date(new Date().setHours(0, 0, 0, 0)),
   addMenu: false,
   addMenuDetails: false,
   categoryModalOpen: false,
   addCategoryTitle: false,
   menuItemModal: false,
+  editMenu: false,
   edittingCategory: false,
   edittingMenuItem: false,
   edittingCategoryTitle: false,
@@ -62,11 +63,13 @@ const state = {
     total: 0
   }
 }
+function isEmpty (res) {
+  return !res.total
+}
 
 function isValueUnique (collection, payload, selector, edit = false) {
   if (edit) {
     let res = _.findIndex(collection, { [selector]: payload[selector] })
-    console.log('Index: ', res, payload.index)
     if (res === -1 || (res !== -1 && res === payload.index)) {
       return true
     }
@@ -90,6 +93,9 @@ const getters = {
   },
   addMenu (state) {
     return state.addMenu
+  },
+  editMenu (state) {
+    return state.editMenu
   },
   addMenuDetails (state) {
     return state.addMenuDetails
@@ -123,9 +129,6 @@ const getters = {
   },
   edittingCategoryTitle (state) {
     return state.edittingCategoryTitle
-  },
-  pagination (state) {
-    return state.pagination
   },
   selectedCategory (state) {
     return state.selectedCategory
@@ -239,9 +242,8 @@ const mutations = {
     payload.metadata.menu = JSON.parse(payload.metadata.menu)
     state.menu = payload
   },
-  EDIT_MENU (state, payload) {
-    payload.metadata.menu = JSON.parse(payload.metadata.menu)
-    state.menu = payload
+  SET_EDIT_MENU (state, payload) {
+    state.editMenu = payload
   },
   SUCCESS (state) {
     state.status = {
@@ -256,9 +258,6 @@ const mutations = {
       success: false,
       error: payload
     }
-  },
-  SET_TOTAL (state, payload) {
-    state.pagination.total = Math.ceil(payload / state.pagination.limit)
   },
   SET_CATEGORIES (state, payload) {
     state.categories = payload
@@ -279,9 +278,7 @@ const mutations = {
     state.menu.metadata.menu.unshift(_.cloneDeep(payload))
   },
   EDIT_CATEGORY (state, payload) {
-    console.log('before: ', state.menu.metadata.menu)
     _.assign(state.menu.metadata.menu[state.selectedCategory], _.cloneDeep(payload))
-    console.log('after: ', state.menu.metadata.menu)
   },
   SET_CATEGORY (state, payload) {
     state.category = payload
@@ -314,23 +311,23 @@ const mutations = {
   },
   SET_INITIALIZE_STATUS (state, payload) {
     state.initializeStatus = payload
+  },
+  SET_MENU_DATE (state) {
+    state.menu.metadata.date = state.selectedDate
   }
 }
 
 const actions = {
   getMenus (context) {
     context.commit('LOADING')
-    console.log('Date1: ', this.state.selectedDate)
     Request.getMenus(this.state.selectedDate.toISOString()).then(res => {
-      console.log('res: ', res)
-      if (res.total) {
-        console.log('here')
+      if (!isEmpty(res)) {
         res.objects.all[0].metadata.menu = JSON.parse(res.objects.all[0].metadata.menu)
         context.commit('SET_MENUS', res.objects.all[0])
       } else {
+        console.log('Error: ')
         context.commit('SET_MENUS', null)
       }
-      context.commit('SET_TOTAL', res.total || 0)
       context.commit('SUCCESS')
     })
       .catch(e => {
@@ -339,26 +336,42 @@ const actions = {
   },
   addMenu (context, payload) {
     context.commit('LOADING')
-    if (isValueUnique(context.getters.menus, payload, 'date')) {
-      Request.addMenu(payload).then(menu => {
-        context.commit('TOGGLE_ADD_MENU')
-        context.commit('ADD_MENU', menu)
-        context.commit('TOGGLE_ADD_MENU_DETAILS')
-        context.commit('TOGGLE_EDITTING', false)
-        context.commit('SUCCESS')
-      })
-        .catch(e => {
-          context.commit('ERROR', 'Something went wrong.')
+    Request.getMenus(context.getters.menu.metadata.date.toISOString()).then(res => {
+      if (isEmpty(res)) {
+        Request.addMenu(payload).then(menu => {
+          context.commit('TOGGLE_ADD_MENU')
+          context.commit('ADD_MENU', menu)
+          context.commit('TOGGLE_ADD_MENU_DETAILS')
+          context.commit('TOGGLE_EDITTING', false)
+          context.commit('SUCCESS')
         })
-    } else {
-      context.commit('ERROR', 'Menu for this date already present!')
-    }
+          .catch(e => {
+            context.commit('ERROR', 'Something went wrong.')
+          })
+      } else {
+        context.commit('ERROR', 'Menu for this date already present!')
+      }
+    })
+      .catch(e => {
+        context.commit('ERROR', 'Something went wrong.')
+      })
   },
   editMenu (context, payload) {
     context.commit('LOADING')
     Request.editMenu(payload).then(menu => {
-      context.commit('EDIT_MENU', menu)
-      context.commit('TOGGLE_EDITTING', false)
+      context.commit('ADD_MENU', menu)
+      context.commit('SET_EDIT_MENU', false)
+      context.commit('SUCCESS')
+    })
+      .catch(e => {
+        context.commit('ERROR', 'Something went wrong.')
+      })
+  },
+  deleteMenu (context, payload) {
+    context.commit('LOADING')
+    Request.deleteMenu(payload).then(menu => {
+      context.commit('SET_MENU_DEFAULT')
+      context.commit('SET_MENUS', null)
       context.commit('SUCCESS')
     })
       .catch(e => {
@@ -427,17 +440,6 @@ const actions = {
     })
       .catch(e => {
         context.commit('MENU_ITEM_ERROR', 'Something went wrong.')
-      })
-  },
-  getCategories (context) {
-    context.commit('LOADING')
-    Request.getCategories(context.getters.pagination).then(res => {
-      context.commit('SET_CATEGORIES', res.objects.all || [])
-      context.commit('SET_TOTAL', res.total || 0)
-      context.commit('SUCCESS')
-    })
-      .catch(e => {
-        context.commit('ERROR', 'Something went wrong.')
       })
   },
   addCategory (context, payload) {
@@ -551,6 +553,15 @@ const actions = {
   },
   setMenu (context, payload) {
     context.commit('SET_MENU', payload)
+  },
+  setEditMenu (context, payload) {
+    context.commit('SET_EDIT_MENU', payload)
+  },
+  setMenuDate (context) {
+    context.commit('SET_MENU_DATE')
+  },
+  setMenus (context, payload) {
+    context.commit('SET_MENUS', payload)
   }
 }
 

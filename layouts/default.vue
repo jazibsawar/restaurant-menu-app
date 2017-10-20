@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="position: relative;">
       <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
           <a class="navbar-item" href="/">
@@ -40,41 +40,8 @@
     animation: loader 1s infinite;
     display: flex;
   }
-  @-moz-keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @-webkit-keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @-o-keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
   @media screen and (min-width: 1024px){
     .navbar {
-        min-height: 5rem;
         border-color: #f2f2f2;
         border-bottom-style: solid;
         border-bottom-width: 0.1px;
@@ -85,14 +52,23 @@
       border-color: #f2f2f2;
       border-bottom-style: solid;
       border-bottom-width: 0.1px;
+      background-color: #f5f5f5;;
   }
 
   a.navbar-item:hover {
-      background-color: white;
+      background-color: #f5f5f5;;
   }
 
   .footer {
     padding: 24px 24px 24px;
+    padding: 5px;
+    background: #CC7F31;
+    color: #000;
+    opacity: 0.5;
+    position: absolute;
+    width: 100%;
+    height: 35px;
+    bottom: 0;
   }
 
 </style>

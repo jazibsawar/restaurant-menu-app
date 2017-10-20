@@ -1,8 +1,21 @@
 <template>
     <section class="container menu">
-        <h2 class="menu-title has-text-centered">{{menus.title}}</h2>
+        <h2 class="menu-title has-text-centered">
+          <span>{{menus.title}}</span>
+          <span >
+            <a class="button edit-button" @click="editMenu(menus)">
+              <span class="icon is-small is-info">
+                <i class="fa fa-edit"></i>
+              </span>
+            </a>
+            <a class="button delete-button" @click="deleteMenu(menus)">
+              <span class="icon is-small is-danger">
+                <i class="fa fa-trash"></i>
+              </span>
+            </a>
+          </span> 
+        </h2>
         <p class="menu-description has-text-centered">{{menus.content}}</p>
-        <button class="button is-small" type="button" @click="editMenu(menus)">Edit</button>
       <div class="menu-category" v-for="(category,index) in menus.metadata.menu" :key="index">
         <h3>{{category.title}}</h3>
         <div class="box" v-for="(item,index) in category.menuItems" :key="index">
@@ -52,16 +65,39 @@ export default {
       this.$store.dispatch('setMenu', menu)
       this.$store.dispatch('toggleEditting', true)
       this.$store.dispatch('toggleAddMenuDetails')
+    },
+    deleteMenu (menu) {
+      this.$store.dispatch('deleteMenu', menu)
     }
   }
 }
 </script>
 
 <style lang="css" scoped>
+    .edit-button {
+      border: 1px solid transparent;;
+      margin: 2px;
+      background-color: Transparent;
+    }
+    .edit-button:hover {
+      border-radius: 50%;
+      border: 1px solid transparent;
+      border-color: blue;
+    }
+    .delete-button {
+      border: 1px solid transparent;;
+      margin: 2px;
+      background-color: Transparent;
+    }
+    .delete-button:hover {
+      border-radius: 50%;
+      border: 1px solid transparent;
+      border-color: red;
+    }
     .menu{
-        max-width: 700px;
+        max-width: 800px;
         margin: auto;
-        padding: 5em 1em;
+        padding: 2.5em 1em;
     }
     .menu > .menu-title {
       font: bold 45px/1.2 'Dancing Script', cursive;
@@ -70,11 +106,11 @@ export default {
       font: 400 15px/1.2 'Libre Baskerville', serif;
       text-transform: uppercase;
       letter-spacing: 2px;
-      color: #a7a9ac;
+      color: #505015;
       margin: 0;
     }
     .menu-category {
-      margin-top: 2em;
+      margin: 2em 3em;
     }
     .menu-category > h3 {
       font: 500 36px/1.2 'Dancing Script', cursive;
@@ -84,7 +120,6 @@ export default {
       margin-bottom: 0.3em;
     }
     .menu-category .box {
-      margin-left: 1em;
       padding: 0.7rem 1rem;
     }
     .menu-category .box:not(:last-child) {

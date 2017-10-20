@@ -1,15 +1,13 @@
 <template>
   <div>
       <div v-if="initializeStatus && !addMenu && !addMenuDetails" class="container menu-date">
-        <b-field label="Select a date">
-          <b-datepicker v-model="selectedDate"
-              :first-day-of-week="1"
-              placeholder="Click to select">
-          </b-datepicker>
-        </b-field>
+        <b-datepicker class="menu-date-picker" v-model="selectedDate"
+            :first-day-of-week="1"
+            placeholder="Click to select">
+        </b-datepicker>
       </div>
       <br>
-     <section class="hero is-primary is-bold is-large" v-if="menus == null && !addMenu && !addMenuDetails">
+     <section class="hero is-bold is-large" v-if="menus == null && !addMenu && !addMenuDetails">
       <div class="hero-body">
         <div class="container-fluid has-text-centered">
           <h1 class="title">
@@ -23,10 +21,11 @@
       </div>
     </section>
     <div v-else-if="!addMenu && !addMenuDetails">
-      <Menu />
+      <RestaurantMenu />
     </div>
     <AddMenuDetails v-if="addMenuDetails" />
     <AddMenu />
+    <b-loading :active.sync="status.loading" :canCancel="true"></b-loading>
   </div>
 </template>
 
@@ -34,17 +33,13 @@
 import {mapGetters} from 'vuex'
 import AddMenu from '~/components/AddMenu.vue'
 import AddMenuDetails from '~/components/AddMenuDetails.vue'
-import Menu from '~/components/Menu.vue'
-
-// import Loader from 'vue-full-loading'
-import Loader from '~/components/Loader.vue'
+import RestaurantMenu from '~/components/Menu.vue'
 
 export default {
   components: {
     AddMenu,
     AddMenuDetails,
-    Menu,
-    Loader
+    RestaurantMenu
   },
   computed: {
     ...mapGetters([
@@ -69,6 +64,7 @@ export default {
   methods: {
     addNewMenu () {
       this.$store.dispatch('toggleAddMenu')
+      this.$store.dispatch('setMenuDate')
     },
     openEditForm (category) {
       this.$store.dispatch('setCategory', category)
@@ -89,5 +85,16 @@ export default {
   .menu-date {
     max-width: 600px;
   }
+  .menu-date-picker >>> .input{
+    border-radius: 5px;
+    height: 40px;
+  }
+  .hero.is-large .hero-body {
+    padding-bottom: 5rem;
+    padding-top: 4rem;
+ }
+ .menu-date-picker >>> .input.is-hovered, .menu-date-picker >>> .input:hover {
+    border-color: #dbdbdb;
+ }
   
 </style>

@@ -21,24 +21,6 @@ function getMenus (date) {
   })
 }
 
-function getCategories (pagination) {
-  return new Promise((resolve, reject) => {
-    const params = {
-      type_slug: config.category_object,
-      limit: pagination.limit,
-      sort: '-created_at',
-      skip: (pagination.page - 1) * pagination.limit
-    }
-    Cosmic.getObjectsByType(config, params, (err, res) => {
-      if (!err) {
-        resolve(res)
-      } else {
-        reject(err)
-      }
-    })
-  })
-}
-
 function addMenu (obj) {
   return new Promise((resolve, reject) => {
     const params = generateMenuObject(obj)
@@ -75,31 +57,32 @@ function editMenu (obj) {
   })
 }
 
-// function deleteMenu (recipe) {
-//   const params = {
-//     write_key: config.bucket.write_key,
-//     slug: recipe.slug
-//   }
-//   const feature_image = _.find(recipe.metafields, ['key', 'feature_image'])
-//   return new Promise((resolve, reject) => {
-//     deleteMedia(feature_image.id).then((res) => {
-//       if (res.status === 200) {
-//         Cosmic.deleteObject(config, params, (err, res) => {
-//           if (!err) {
-//             resolve(res)
-//           } else {
-//             reject(err)
-//           }
-//         })
-//       } else {
-//         reject(err)
-//       }
-//     })
-//       .catch((e) => {
-//         reject(e)
-//       })
-//   })
-// }
+function deleteMenu (menu) {
+  const params = {
+    write_key: config.bucket.write_key,
+    slug: menu.slug
+  }
+  console.log('Menu: ', menu.metadata.menu)
+  if (!newFunction()) {
+    for (var i = 0; i < menu.metadata.menu.length; i++) {
+      console.log('Deleting: ', menu.metadata.menu[i])
+      deleteCategory(menu.metadata.menu[i])
+    }
+  }
+  return new Promise((resolve, reject) => {
+    Cosmic.deleteObject(config, params, (err, res) => {
+      if (!err) {
+        resolve(res)
+      } else {
+        reject(err)
+      }
+    })
+  })
+
+  function newFunction () {
+    return !menu.metadata.menu
+  }
+}
 function saveMedia (payload) {
   return new Promise((resolve, reject) => {
     if (payload.feature_image.file && payload.feature_image.id) {
@@ -163,4 +146,4 @@ function deleteMedia (id) {
     })
   })
 }
-export default {getMenus, addMenu, editMenu, getCategories, deleteCategory, saveMedia, deleteMedia}
+export default {getMenus, addMenu, editMenu, deleteCategory, saveMedia, deleteMedia, deleteMenu}

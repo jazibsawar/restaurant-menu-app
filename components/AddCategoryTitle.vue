@@ -1,5 +1,5 @@
 <template>
-  <b-modal :active.sync="addCategoryTitle" max-width="500px">
+  <b-modal :active.sync="addCategoryTitle" :canCancel="['x', 'outside']" max-width="500px">
       <div class="modal-card">
         <header class="modal-card-head">
             <p class="modal-card-title">{{ edittingCategoryTitle ? 'Edit ' : 'Add ' }} Category Title</p>
@@ -40,7 +40,15 @@ export default {
       'addCategoryTitle',
       'categoryStatus',
       'edittingCategoryTitle'
-    ])
+    ]),
+    addCategoryTitle: {
+      get: function () {
+        return this.$store.state.addCategoryTitle
+      },
+      set: function (value) {
+        this.$store.dispatch('toggleAddCategoryTitle')
+      }
+    }
   },
   methods: {
     closeDialog () {

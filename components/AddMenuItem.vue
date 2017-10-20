@@ -23,7 +23,6 @@
     <b-field :message="errors.collect('price')">
         <b-input
             type="number"
-            maxlength="200"
             v-model="menuItem.price"
             placeholder="Menu Item Price"
             v-validate="'required'" data-vv-name="price"

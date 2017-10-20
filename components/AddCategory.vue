@@ -1,5 +1,5 @@
 <template>
-  <b-modal :active.sync="categoryModalOpen" max-width="500px">
+  <b-modal :active.sync="categoryModalOpen" :canCancel="['x', 'outside']" max-width="500px">
       <div class="modal-card">
         <header class="modal-card-head">
             <p class="modal-card-title">{{ edittingCategory ? 'Edit ' : 'Add ' }} Category</p>
@@ -33,9 +33,19 @@
                 </p>
               </div>
             </div>
-
+            <div>
+                <p id="menu_item">
+                  <label class="label is-medium">Menu Items</label>
+                </p>
+                <p id="add_menu_btn">
+                  <button v-if="!menuItemModal" class="button is-warning" @click="addMenuItemModal">
+                          Add Item
+                  </button>
+                </p>
+                <br/><br/>
+              </div>
             <div >
-              <label class="label is-medium">Menu Items</label>
+              
                 <div class="box" v-if="category.menuItems" v-for="(item,index) in category.menuItems" :key="index">
                   <article class="media">
                     <div class="media-left menu-item-image">
@@ -57,12 +67,18 @@
                             <p>${{item.price}}</p>
                           </div>
                           <div class="column menu-item-price">
-                            <button class="button is-warning" @click="editMenuItem(item, index)">
-                                Edit
-                            </button>
-                            <button class="button is-danger" @click="removeMenuItem(index)">
-                                Delete
-                            </button>
+                            <div>
+                              <a class="button" @click="editMenuItem(item, index)">
+                                <span class="icon is-small is-info">
+                                  <i class="fa fa-edit"></i>
+                                </span>
+                              </a>
+                              <a class="button" @click="removeMenuItem(index)">
+                                <span class="icon is-small is-danger">
+                                  <i class="fa fa-trash"></i>
+                                </span>
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -71,10 +87,12 @@
                 </div>
                 <div v-if="menuItemModal">
                     <AddMenuItem />
+                    <div align="center">
+                      <button class="button is-danger" @click="addMenuItemModal">
+                            Hide
+                      </button>
+                    </div>
                 </div>
-                <button v-if="!menuItemModal" class="button is-warning" @click="addMenuItemModal">
-                      Add
-                </button>
             </div>
         </section>
         <footer class="modal-card-foot">
@@ -97,11 +115,23 @@ export default {
     ...mapGetters([
       'category',
       'menuItemModal',
-      'categoryModalOpen',
       'edittingCategory',
       'edittingCategoryTitle',
       'categoryStatus'
-    ])
+    ]),
+    categoryModalOpen: {
+      get: function () {
+        return this.$store.state.categoryModalOpen
+      },
+      set: function (value) {
+        this.$validator.reset()
+        this.$store.dispatch('toggleCategoryModal')
+        this.$store.dispatch('setSelectedCategory', 0)
+        this.$store.dispatch('toggleEdittingCategory', false)
+        this.$store.dispatch('setCategoryDefault')
+        this.$store.dispatch('setCategoryStatus')
+      }
+    }
   },
   methods: {
     addMenuItemModal () {
@@ -165,5 +195,15 @@ export default {
       font-weight: bold;
       font-family: 'Dancing Script';
       color: #1a1a1a;
+    }
+    #menu_item{
+      width:50%;
+      text-align:left;
+      display: inline-block;
+    }
+    #add_menu_btn{
+      width:50%;
+      text-align:right;
+      display: inline-block;
     }
 </style>

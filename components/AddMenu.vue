@@ -1,5 +1,5 @@
 <template>
- <b-modal :active.sync="addMenu" max-width="500px">
+ <b-modal :active.sync="addMenu" :canCancel="['x', 'outside']" max-width="500px">
     <div class="modal-card">
       <header class="modal-card-head">
           <p class="modal-card-title">{{ editting ? 'Edit ' : 'Add ' }} Menu</p>
@@ -33,11 +33,11 @@
                   required>
               </b-input>
           </b-field>
+          <div style="color: red" v-show="status.error" >
+               *{{ status.error }}
+          </div>
       </section>
       <footer class="modal-card-foot">
-          <div style="color: red" v-show="status.error" >
-                {{ status.error }}
-          </div>
           <button class="button is-medium" type="button" @click="closeDialog">Close</button>
           <button v-if="!status.loading" class="button is-info is-medium" @click="saveMenu(menu)" >Save</button>
           <button v-else class="button is-info is-loading is-medium" @click="saveMenu(menu)" disabled>Save</button>
