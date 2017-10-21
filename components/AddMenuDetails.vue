@@ -121,14 +121,12 @@
 import {mapGetters} from 'vuex'
 import AddCategory from '~/components/AddCategory.vue'
 import AddCategoryTitle from '~/components/AddCategoryTitle.vue'
-import Loader from '~/components/Loader.vue'
 import _ from 'lodash'
 
 export default {
   components: {
     AddCategory,
-    AddCategoryTitle,
-    Loader
+    AddCategoryTitle
   },
   computed: {
     ...mapGetters([

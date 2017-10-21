@@ -48,12 +48,8 @@
 
 <script>
 import {mapGetters} from 'vuex'
-import Loader from '~/components/Loader.vue'
 
 export default {
-  components: {
-    Loader
-  },
   computed: {
     ...mapGetters([
       'menu', 'status', 'editting'

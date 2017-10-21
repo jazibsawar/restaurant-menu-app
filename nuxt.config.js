@@ -10,7 +10,7 @@ module.exports = {
       { hid: 'description', name: 'description', content: 'Cosmic Restaurant Menu App' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon-32x32.png' },
       { rel: 'stylesheet', type: 'text/css', href: 'https://fonts.googleapis.com/icon?family=Material+Icons' },
       { rel: 'stylesheet', type: 'text/css', href: 'https://fonts.googleapis.com/css?family=Dancing+Script:700' },
       { rel: 'stylesheet', type: 'text/css', href: 'https://fonts.googleapis.com/css?family=Crimson+Text:400,600,700,400italic' }
