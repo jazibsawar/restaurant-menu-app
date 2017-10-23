@@ -325,7 +325,6 @@ const actions = {
         res.objects.all[0].metadata.menu = JSON.parse(res.objects.all[0].metadata.menu)
         context.commit('SET_MENUS', res.objects.all[0])
       } else {
-        console.log('Error: ')
         context.commit('SET_MENUS', null)
       }
       context.commit('SUCCESS')

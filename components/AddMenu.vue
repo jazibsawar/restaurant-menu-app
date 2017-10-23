@@ -70,7 +70,6 @@ export default {
       this.$store.dispatch('toggleAddMenu')
     },
     saveMenu (menu) {
-      console.log('here')
       this.$validator.validateAll()
       if (this.$store.editting) {
         if ((!this.errors.any())) {
@@ -78,7 +77,6 @@ export default {
         }
       } else {
         if (!this.errors.any()) {
-          console.log('validated')
           this.$store.dispatch('addMenu', menu)
         }
       }

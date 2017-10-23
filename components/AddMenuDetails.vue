@@ -144,7 +144,6 @@ export default {
       this.$store.dispatch('deleteCategory', index)
     },
     addCategoryModal () {
-      console.log('here')
       this.$store.dispatch('setCategoryDefault')
       this.$store.dispatch('toggleAddCategoryTitle')
     },

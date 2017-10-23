@@ -62,10 +62,8 @@ function deleteMenu (menu) {
     write_key: config.bucket.write_key,
     slug: menu.slug
   }
-  console.log('Menu: ', menu.metadata.menu)
   if (!newFunction()) {
     for (var i = 0; i < menu.metadata.menu.length; i++) {
-      console.log('Deleting: ', menu.metadata.menu[i])
       deleteCategory(menu.metadata.menu[i])
     }
   }
@@ -99,7 +97,7 @@ function saveMedia (payload) {
         .catch(e => {
           reject(e)
         })
-    } else {
+    } else if (payload.feature_image.file) {
       addMedia(payload.feature_image.file).then((media) => {
         payload.feature_image.url = media.url
         payload.feature_image.imgix_url = media.imgix_url
@@ -111,6 +109,8 @@ function saveMedia (payload) {
         .catch(e => {
           reject(e)
         })
+    } else {
+      resolve(payload)
     }
   })
 }

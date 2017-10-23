@@ -81,7 +81,6 @@ export default {
       this.$validator.validateAll()
       if (this.$store.getters.edittingMenuItem) {
         if ((!this.errors.any()) || (this.errors.count() === 1 && this.errors.has('image'))) {
-          console.log(menuItem)
           this.$store.dispatch('editMenuItem', menuItem)
         }
       } else {

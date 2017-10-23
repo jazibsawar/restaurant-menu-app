@@ -29,7 +29,7 @@
   
   export default {
     store,
-    beforeMount: function () {
+    mounted: function () {
       this.$store.dispatch('getMenus')
       this.$store.dispatch('setInitializeStatus', true)
     }

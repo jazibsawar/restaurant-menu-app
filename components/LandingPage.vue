@@ -75,7 +75,6 @@ export default {
       this.$store.dispatch('deleteCategory', category)
     },
     getMenu () {
-      console.log('here')
       this.$store.dispatch('getMenus')
     }
   }
