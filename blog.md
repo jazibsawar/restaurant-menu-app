@@ -819,11 +819,11 @@ export default store
 ```javascript
 const config = {
   bucket: {
-    slug: 'restaurant-menu-app',
-    read_key: 'DSTjEtUhwVUe2WS3pwnZl36rQf5qiRVWVuSraQw7atHpd8XUIA',
-    write_key: 'MjgkxDPTFACpycQpTsPeBDbOYBObzdY7g8PfYuPnQ76DVb5kxA'
+    slug: 'BUCKET_SLUG',
+    read_key: 'BUCKET_READ_KEY',
+    write_key: 'BUCKET_WRITE_KEY'
   },
-  object_type: 'menus'
+  object_type: 'BUCKET_OBJECT_TYPE'
 }
 
 export default config
