@@ -7,12 +7,15 @@
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
-    "start": "nuxt start",
+    "start": "npm run build && nuxt start",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "precommit": "npm run lint"
   },
   "dependencies": {
+    "vue": "2.4.4",
+    "vue-server-renderer": "2.4.4",
+    "vue-template-compiler": "2.4.4",
     "async": "^2.5.0",
     "buefy": "^0.5.4",
     "cosmicjs": "^2.4.20",

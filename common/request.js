@@ -1,4 +1,4 @@
-import Cosmic from './Cosmic'
+import Cosmic from './cosmic'
 import config from '../config/config'
 import async from 'async'
 // import _ from 'lodash'
