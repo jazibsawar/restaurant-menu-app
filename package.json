@@ -14,9 +14,6 @@
     "precommit": "npm run lint"
   },
   "dependencies": {
-    "vue": "2.4.4",
-    "vue-server-renderer": "2.4.4",
-    "vue-template-compiler": "2.4.4",
     "async": "^2.5.0",
     "buefy": "^0.5.4",
     "cosmicjs": "^2.4.20",
@@ -25,7 +22,10 @@
     "lodash": "^4.17.4",
     "nuxt": "^1.0.0-rc11",
     "style-loader": "^0.19.0",
-    "vee-validate": "^2.0.0-rc.18"
+    "vee-validate": "^2.0.0-rc.18",
+    "vue": "2.4.4",
+    "vue-server-renderer": "2.4.4",
+    "vue-template-compiler": "2.4.4"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
