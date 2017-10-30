@@ -57,6 +57,7 @@ const state = {
   editting: false,
   selectedCategory: null,
   initializeStatus: false,
+  isPresent: false,
   pagination: {
     page: 1,
     limit: 12,
@@ -81,6 +82,9 @@ function isValueUnique (collection, payload, selector, edit = false) {
 const getters = {
   category (state) {
     return state.category
+  },
+  isPresent (state) {
+    return state.isPresent
   },
   menuItem (state) {
     return state.menuItem
@@ -314,6 +318,9 @@ const mutations = {
   },
   SET_MENU_DATE (state) {
     state.menu.metadata.date = state.selectedDate
+  },
+  SET_IS_PRESENT (state, payload) {
+    state.isPresent = payload
   }
 }
 
@@ -321,11 +328,25 @@ const actions = {
   getMenus (context) {
     context.commit('LOADING')
     Request.getMenus(this.state.selectedDate.toISOString()).then(res => {
+      console.log('Response: ', !isEmpty(res))
       if (!isEmpty(res)) {
         res.objects.all[0].metadata.menu = JSON.parse(res.objects.all[0].metadata.menu)
         context.commit('SET_MENUS', res.objects.all[0])
+        context.commit('SET_IS_PRESENT', false)
       } else {
-        context.commit('SET_MENUS', null)
+        Request.getMenus('default').then(res => {
+          console.log('default_menu: ', res)
+          if (!isEmpty(res)) {
+            res.objects.all[0].metadata.menu = JSON.parse(res.objects.all[0].metadata.menu)
+            context.commit('SET_MENUS', res.objects.all[0])
+          } else {
+            context.commit('SET_MENUS', null)
+          }
+          context.commit('SET_IS_PRESENT', true)
+        })
+          .catch(e => {
+            context.commit('ERROR', 'Something went wrong.')
+          })
       }
       context.commit('SUCCESS')
     })
@@ -338,10 +359,11 @@ const actions = {
     Request.getMenus(context.getters.menu.metadata.date.toISOString()).then(res => {
       if (isEmpty(res)) {
         Request.addMenu(payload).then(menu => {
-          context.commit('TOGGLE_ADD_MENU')
+          if (!context.getters.isPresent) context.commit('TOGGLE_ADD_MENU')
           context.commit('ADD_MENU', menu)
+          context.commit('SET_MENUS', menu)
           context.commit('TOGGLE_ADD_MENU_DETAILS')
-          context.commit('TOGGLE_EDITTING', false)
+          context.commit('TOGGLE_EDITTING', context.getters.isPresent)
           context.commit('SUCCESS')
         })
           .catch(e => {

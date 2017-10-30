@@ -22,7 +22,9 @@
           <article class="media">
             <div class="media-left">
               <figure class="image menu-item-image">
-                <img :src="item.feature_image.url" :alt="item.title" :title="item.title">
+                <a @click="openImageModel(item.feature_image.url)">
+                  <img :src="item.feature_image.url" :alt="item.title" :title="item.title" >
+                </a>
               </figure>
             </div>
             <div class="media-content">
@@ -44,27 +46,66 @@
           </article>
         </div>
       </div>
+      <b-modal :active.sync="openImageFlag">
+          <p class="image is-4by3">
+              <img :src="this.image">
+          </p>
+      </b-modal>
     </section>
 </template>
 
 <script>
 import {mapGetters} from 'vuex'
+import _ from 'lodash'
 
 export default {
+  data () {
+    return {
+      openImageModal: false,
+      image: null
+    }
+  },
   computed: {
     ...mapGetters([
       'menus',
       'status'
-    ])
+    ]),
+    openImageFlag: {
+      get: function () {
+        return this.openImageModal
+      },
+      set: function (value) {
+        this.openImageModal = value
+      }
+    }
   },
   methods: {
+    openImageModel (image) {
+      this.image = image
+      this.openImageModal = true
+    },
     addNewMenu () {
       this.$store.dispatch('toggleAddMenu')
     },
     editMenu (menu) {
-      this.$store.dispatch('setMenu', menu)
-      this.$store.dispatch('toggleEditting', true)
-      this.$store.dispatch('toggleAddMenuDetails')
+      if (this.$store.state.isPresent) {
+        var newMenu = {
+          title: _.cloneDeep(menu.title),
+          content: _.cloneDeep(menu.content),
+          metadata: {
+            menu: _.cloneDeep(menu.metadata.menu),
+            date: this.$store.state.selectedDate
+          }
+        }
+        console.log('Adding Menu: ', newMenu)
+        this.$store.dispatch('setMenu', newMenu)
+        this.$store.dispatch('addMenu', newMenu)
+        // this.$store.dispatch('setMenus', this.$store.state.menu)
+      } else {
+        this.$store.dispatch('setMenu', menu)
+        this.$store.dispatch('toggleEditting', true)
+        this.$store.dispatch('toggleAddMenuDetails')
+      }
     },
     deleteMenu (menu) {
       this.$store.dispatch('deleteMenu', menu)
