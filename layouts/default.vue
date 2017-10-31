@@ -15,7 +15,7 @@
         <div class="container">
           <div class="content has-text-centered">
             <p>
-              Powered by <strong>CosmicJs</strong>
+              <a href="https://cosmicjs.com" style="color: #fff" target="_blank">Powered by <strong>Cosmic JS</strong></a>
             </p>
           </div>
         </div>
