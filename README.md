@@ -1,4 +1,4 @@
-# restaurant-menu-app
+# Restaurant Menu App
 
 > Cosmic Restaurant Menu App
 
