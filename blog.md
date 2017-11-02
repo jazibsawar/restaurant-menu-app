@@ -37,6 +37,7 @@ After successfull completion of the last command browser window will automatical
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
+    "heroku-postbuild": "npm run build",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "precommit": "npm run lint"
@@ -50,7 +51,10 @@ After successfull completion of the last command browser window will automatical
     "lodash": "^4.17.4",
     "nuxt": "^1.0.0-rc11",
     "style-loader": "^0.19.0",
-    "vee-validate": "^2.0.0-rc.18"
+    "vee-validate": "^2.0.0-rc.18",
+    "vue": "2.4.4",
+    "vue-server-renderer": "2.4.4",
+    "vue-template-compiler": "2.4.4"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
@@ -170,10 +174,10 @@ default.js in the layouts directory is the starting point in all the app. Here w
 <script>
   import store from '~/store/store'
   import('~/node_modules/font-awesome/css/font-awesome.css')
-
+  
   export default {
     store,
-    beforeMount: function () {
+    mounted: function () {
       this.$store.dispatch('getMenus')
       this.$store.dispatch('setInitializeStatus', true)
     }
@@ -292,6 +296,7 @@ const state = {
   editting: false,
   selectedCategory: null,
   initializeStatus: false,
+  isPresent: false,
   pagination: {
     page: 1,
     limit: 12,
@@ -316,6 +321,9 @@ function isValueUnique (collection, payload, selector, edit = false) {
 const getters = {
   category (state) {
     return state.category
+  },
+  isPresent (state) {
+    return state.isPresent
   },
   menuItem (state) {
     return state.menuItem
@@ -549,6 +557,9 @@ const mutations = {
   },
   SET_MENU_DATE (state) {
     state.menu.metadata.date = state.selectedDate
+  },
+  SET_IS_PRESENT (state, payload) {
+    state.isPresent = payload
   }
 }
 
@@ -556,12 +567,25 @@ const actions = {
   getMenus (context) {
     context.commit('LOADING')
     Request.getMenus(this.state.selectedDate.toISOString()).then(res => {
+      console.log('Response: ', !isEmpty(res))
       if (!isEmpty(res)) {
         res.objects.all[0].metadata.menu = JSON.parse(res.objects.all[0].metadata.menu)
         context.commit('SET_MENUS', res.objects.all[0])
+        context.commit('SET_IS_PRESENT', false)
       } else {
-        console.log('Error: ')
-        context.commit('SET_MENUS', null)
+        Request.getMenus('default').then(res => {
+          console.log('default_menu: ', res)
+          if (!isEmpty(res)) {
+            res.objects.all[0].metadata.menu = JSON.parse(res.objects.all[0].metadata.menu)
+            context.commit('SET_MENUS', res.objects.all[0])
+          } else {
+            context.commit('SET_MENUS', null)
+          }
+          context.commit('SET_IS_PRESENT', true)
+        })
+          .catch(e => {
+            context.commit('ERROR', 'Something went wrong.')
+          })
       }
       context.commit('SUCCESS')
     })
@@ -574,10 +598,11 @@ const actions = {
     Request.getMenus(context.getters.menu.metadata.date.toISOString()).then(res => {
       if (isEmpty(res)) {
         Request.addMenu(payload).then(menu => {
-          context.commit('TOGGLE_ADD_MENU')
+          if (!context.getters.isPresent) context.commit('TOGGLE_ADD_MENU')
           context.commit('ADD_MENU', menu)
+          context.commit('SET_MENUS', menu)
           context.commit('TOGGLE_ADD_MENU_DETAILS')
-          context.commit('TOGGLE_EDITTING', false)
+          context.commit('TOGGLE_EDITTING', context.getters.isPresent)
           context.commit('SUCCESS')
         })
           .catch(e => {
@@ -809,7 +834,7 @@ const store = () => {
   })
 }
 
-export default store
+export default store]
 ```
 
 ## Config ##
@@ -1067,7 +1092,9 @@ Menu.vue shows the menu fetched for that date.
           <article class="media">
             <div class="media-left">
               <figure class="image menu-item-image">
-                <img :src="item.feature_image.url" :alt="item.title" :title="item.title">
+                <a @click="openImageModel(item.feature_image.url)">
+                  <img :src="item.feature_image.url" :alt="item.title" :title="item.title" >
+                </a>
               </figure>
             </div>
             <div class="media-content">
@@ -1089,27 +1116,66 @@ Menu.vue shows the menu fetched for that date.
           </article>
         </div>
       </div>
+      <b-modal :active.sync="openImageFlag">
+          <p class="image is-4by3">
+              <img :src="this.image">
+          </p>
+      </b-modal>
     </section>
 </template>
 
 <script>
 import {mapGetters} from 'vuex'
+import _ from 'lodash'
 
 export default {
+  data () {
+    return {
+      openImageModal: false,
+      image: null
+    }
+  },
   computed: {
     ...mapGetters([
       'menus',
       'status'
-    ])
+    ]),
+    openImageFlag: {
+      get: function () {
+        return this.openImageModal
+      },
+      set: function (value) {
+        this.openImageModal = value
+      }
+    }
   },
   methods: {
+    openImageModel (image) {
+      this.image = image
+      this.openImageModal = true
+    },
     addNewMenu () {
       this.$store.dispatch('toggleAddMenu')
     },
     editMenu (menu) {
-      this.$store.dispatch('setMenu', menu)
-      this.$store.dispatch('toggleEditting', true)
-      this.$store.dispatch('toggleAddMenuDetails')
+      if (this.$store.state.isPresent) {
+        var newMenu = {
+          title: _.cloneDeep(menu.title),
+          content: _.cloneDeep(menu.content),
+          metadata: {
+            menu: _.cloneDeep(menu.metadata.menu),
+            date: this.$store.state.selectedDate
+          }
+        }
+        console.log('Adding Menu: ', newMenu)
+        this.$store.dispatch('setMenu', newMenu)
+        this.$store.dispatch('addMenu', newMenu)
+        // this.$store.dispatch('setMenus', this.$store.state.menu)
+      } else {
+        this.$store.dispatch('setMenu', menu)
+        this.$store.dispatch('toggleEditting', true)
+        this.$store.dispatch('toggleAddMenuDetails')
+      }
     },
     deleteMenu (menu) {
       this.$store.dispatch('deleteMenu', menu)
@@ -1177,7 +1243,7 @@ export default {
     }
     .menu-item-image img {
       height: 100%;
-      width: auto;
+      width: 100%;
     }
     .menu-item-info {
       min-height: 92px;
