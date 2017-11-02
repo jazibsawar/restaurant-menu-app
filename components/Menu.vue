@@ -173,7 +173,7 @@ export default {
     }
     .menu-item-image img {
       height: 100%;
-      width: auto;
+      width: 100%;
     }
     .menu-item-info {
       min-height: 92px;
